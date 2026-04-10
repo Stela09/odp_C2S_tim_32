@@ -21,7 +21,7 @@ M="mysql  -h127.0.0.1    -P3306 -uroot -p${ROOT_PASS} --protocol=TCP --connect-t
 S1="mysql -hmysql-slave1 -P3306 -uroot -p${ROOT_PASS} --protocol=TCP --connect-timeout=5"
 S2="mysql -hmysql-slave2 -P3306 -uroot -p${ROOT_PASS} --protocol=TCP --connect-timeout=5"
 
-SCHEMA_FILE="/tmp/project_schema.sql"
+SCHEMA_FILE="/tmp/project_schema.sql"docker cp 
 
 echo ""
 echo "========================================================"
