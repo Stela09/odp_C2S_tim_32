@@ -1,6 +1,7 @@
 import { RowDataPacket, ResultSetHeader } from "mysql2";
 import { IUserRepository } from "../../../Domain/repositories/users/IUserRepository";
 import { User } from "../../../Domain/models/User";
+import { UserDto } from "../../../Domain/DTOs/users/UserDto";
 import { UserRole } from "../../../Domain/enums/UserRole";
 import { DbManager } from "../../connection/DbConnectionPool";
 import { ILoggerService } from "../../../Domain/services/logger/ILoggerService";
@@ -12,7 +13,13 @@ export class UserRepository implements IUserRepository {
   ) {}
 
   private map(r: RowDataPacket): User {
-    return new User(r.id, r.username, r.email, r.role as UserRole, r.passwordHash, r.isActive);
+    return new User(r.id, r.gamer_tag, r.full_name, r.email, r.password_hash,
+      r.profile_image, r.role as UserRole, new Date(r.created_at));
+  }
+
+  private mapDto(r: RowDataPacket): UserDto {
+    return new UserDto(r.id, r.gamer_tag, r.full_name, r.email,
+      r.role as UserRole, r.profile_image, new Date(r.created_at));
   }
 
   async create(user: User): Promise<User> {
@@ -20,72 +27,85 @@ export class UserRepository implements IUserRepository {
     if (!res) return new User();
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `INSERT INTO users (username, email, role, passwordHash) VALUES (?, ?, ?, ?)`,
-        [user.username, user.email, user.role, user.passwordHash]
+        `INSERT INTO users (gamer_tag, full_name, email, password_hash, profile_image, role)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [user.gamer_tag, user.full_name, user.email, user.password_hash, user.profile_image, user.role]
       );
       if (result.insertId === 0) return new User();
-      return new User(result.insertId, user.username, user.email, user.role, user.passwordHash);
+      return new User(result.insertId, user.gamer_tag, user.full_name, user.email,
+        user.password_hash, user.profile_image, user.role);
     } catch (err) {
       this.logger.error("UserRepository", "create failed", err);
       return new User();
     } finally { res.conn.release(); }
   }
 
-  async findById(id: number): Promise<User> {
+  async findById(id: number): Promise<UserDto | null> {
     const res = await this.db.getReadConnection();
-    if (!res) return new User();
+    if (!res) return null;
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE id = ?`, [id]);
-      return rows.length > 0 ? this.map(rows[0]) : new User();
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM users WHERE id = ?`, [id]
+      );
+      return rows.length > 0 ? this.mapDto(rows[0]) : null;
     } catch (err) {
       this.logger.error("UserRepository", "findById failed", err);
-      return new User();
+      return null;
     } finally { res.conn.release(); }
   }
 
-  async findByUsername(username: string): Promise<User> {
+  async findByGamerTag(gamerTag: string): Promise<User | null> {
     const res = await this.db.getReadConnection();
-    if (!res) return new User();
+    if (!res) return null;
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE username = ?`, [username]);
-      return rows.length > 0 ? this.map(rows[0]) : new User();
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM users WHERE gamer_tag = ?`, [gamerTag]
+      );
+      return rows.length > 0 ? this.map(rows[0]) : null;
     } catch (err) {
-      this.logger.error("UserRepository", "findByUsername failed", err);
-      return new User();
+      this.logger.error("UserRepository", "findByGamerTag failed", err);
+      return null;
     } finally { res.conn.release(); }
   }
 
-  async findByEmail(email: string): Promise<User> {
+  async findByEmail(email: string): Promise<User | null> {
     const res = await this.db.getReadConnection();
-    if (!res) return new User();
+    if (!res) return null;
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users WHERE email = ?`, [email]);
-      return rows.length > 0 ? this.map(rows[0]) : new User();
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM users WHERE email = ?`, [email]
+      );
+      return rows.length > 0 ? this.map(rows[0]) : null;
     } catch (err) {
       this.logger.error("UserRepository", "findByEmail failed", err);
-      return new User();
+      return null;
     } finally { res.conn.release(); }
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<UserDto[]> {
     const res = await this.db.getReadConnection();
     if (!res) return [];
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM users ORDER BY id ASC`);
-      return rows.map((r) => this.map(r));
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM users ORDER BY created_at DESC`
+      );
+      return rows.map((r) => this.mapDto(r));
     } catch (err) {
       this.logger.error("UserRepository", "findAll failed", err);
       return [];
     } finally { res.conn.release(); }
   }
 
-  async update(user: User): Promise<boolean> {
+  async update(id: number, fields: Partial<User>): Promise<boolean> {
     const res = await this.db.getWriteConnection();
     if (!res) return false;
     try {
+      const entries = Object.entries(fields).filter(([, v]) => v !== undefined);
+      if (entries.length === 0) return false;
+      const setClause = entries.map(([k]) => `${k} = ?`).join(", ");
+      const values = entries.map(([, v]) => v);
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `UPDATE users SET username = ?, email = ?, role = ?, isActive = ? WHERE id = ?`,
-        [user.username, user.email, user.role, user.isActive, user.id]
+        `UPDATE users SET ${setClause} WHERE id = ?`, [...values, id]
       );
       return result.affectedRows > 0;
     } catch (err) {
@@ -94,16 +114,16 @@ export class UserRepository implements IUserRepository {
     } finally { res.conn.release(); }
   }
 
-  async deactivate(id: number): Promise<boolean> {
+  async updateRole(id: number, role: string): Promise<boolean> {
     const res = await this.db.getWriteConnection();
     if (!res) return false;
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `UPDATE users SET isActive = 0 WHERE id = ?`, [id]
+        `UPDATE users SET role = ? WHERE id = ?`, [role, id]
       );
       return result.affectedRows > 0;
     } catch (err) {
-      this.logger.error("UserRepository", "deactivate failed", err);
+      this.logger.error("UserRepository", "updateRole failed", err);
       return false;
     } finally { res.conn.release(); }
   }

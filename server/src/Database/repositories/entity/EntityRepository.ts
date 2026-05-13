@@ -16,14 +16,20 @@ export class EntityRepository implements IEntityRepository {
   ) {}
 
   private map(r: RowDataPacket): EntityDto {
-    return new EntityDto(r.id, r.userId, r.status as EntityStatus, new Date(r.createdAt));
+    return new EntityDto(
+      r.id, r.game_id, r.name, r.format, r.max_teams,
+      new Date(r.registration_deadline), new Date(r.starts_at),
+      r.prize_pool, r.status as EntityStatus, new Date(r.created_at)
+    );
   }
 
   async findById(id: number): Promise<EntityDto | null> {
     const res = await this.db.getReadConnection();
     if (!res) return null;
     try {
-      const [rows] = await res.conn.execute<RowDataPacket[]>(`SELECT * FROM entities WHERE id = ?`, [id]);
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM tournaments WHERE id = ?`, [id]
+      );
       return rows.length > 0 ? this.map(rows[0]) : null;
     } catch (err) {
       this.logger.error("EntityRepository", "findById failed", err);
@@ -37,7 +43,7 @@ export class EntityRepository implements IEntityRepository {
     const offset = (page - 1) * limit;
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT * FROM entities ORDER BY id DESC LIMIT ? OFFSET ?`, [limit, offset]
+        `SELECT * FROM tournaments ORDER BY created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
       );
       return rows.map((r) => this.map(r));
     } catch (err) {
@@ -46,16 +52,30 @@ export class EntityRepository implements IEntityRepository {
     } finally { res.conn.release(); }
   }
 
-  async findByUserId(userId: number): Promise<EntityDto[]> {
+  async findByGameId(gameId: number): Promise<EntityDto[]> {
     const res = await this.db.getReadConnection();
     if (!res) return [];
     try {
       const [rows] = await res.conn.execute<RowDataPacket[]>(
-        `SELECT * FROM entities WHERE userId = ? ORDER BY id DESC`, [userId]
+        `SELECT * FROM tournaments WHERE game_id = ? ORDER BY created_at DESC`, [gameId]
       );
       return rows.map((r) => this.map(r));
     } catch (err) {
-      this.logger.error("EntityRepository", "findByUserId failed", err);
+      this.logger.error("EntityRepository", "findByGameId failed", err);
+      return [];
+    } finally { res.conn.release(); }
+  }
+
+  async findByStatus(status: string): Promise<EntityDto[]> {
+    const res = await this.db.getReadConnection();
+    if (!res) return [];
+    try {
+      const [rows] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT * FROM tournaments WHERE status = ? ORDER BY created_at DESC`, [status]
+      );
+      return rows.map((r) => this.map(r));
+    } catch (err) {
+      this.logger.error("EntityRepository", "findByStatus failed", err);
       return [];
     } finally { res.conn.release(); }
   }
@@ -65,11 +85,13 @@ export class EntityRepository implements IEntityRepository {
     if (!res) return new Entity();
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `INSERT INTO entities (userId) VALUES (?)`,
-        [dto.userId]
+        `INSERT INTO tournaments (game_id, name, format, max_teams, registration_deadline, starts_at, prize_pool)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [dto.game_id, dto.name, dto.format, dto.max_teams, dto.registration_deadline, dto.starts_at, dto.prize_pool]
       );
       if (result.insertId === 0) return new Entity();
-      return new Entity(result.insertId, dto.userId);
+      return new Entity(result.insertId, dto.game_id, dto.name, dto.format, dto.max_teams,
+        dto.registration_deadline, dto.starts_at, dto.prize_pool);
     } catch (err) {
       this.logger.error("EntityRepository", "create failed", err);
       return new Entity();
@@ -85,7 +107,7 @@ export class EntityRepository implements IEntityRepository {
       const setClause = entries.map(([k]) => `${k} = ?`).join(", ");
       const values = entries.map(([, v]) => v);
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `UPDATE entities SET ${setClause} WHERE id = ?`, [...values, id]
+        `UPDATE tournaments SET ${setClause} WHERE id = ?`, [...values, id]
       );
       return result.affectedRows > 0;
     } catch (err) {
@@ -99,7 +121,7 @@ export class EntityRepository implements IEntityRepository {
     if (!res) return false;
     try {
       const [result] = await res.conn.execute<ResultSetHeader>(
-        `DELETE FROM entities WHERE id = ?`, [id]
+        `DELETE FROM tournaments WHERE id = ?`, [id]
       );
       return result.affectedRows > 0;
     } catch (err) {

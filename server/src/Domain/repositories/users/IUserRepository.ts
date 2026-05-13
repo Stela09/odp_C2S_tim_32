@@ -1,11 +1,12 @@
 import { User } from "../../models/User";
+import { UserDto } from "../../DTOs/users/UserDto";
 
 export interface IUserRepository {
-  findById(id: number): Promise<User>;
-  findByUsername(username: string): Promise<User>;
-  findByEmail(email: string): Promise<User>;
-  findAll(): Promise<User[]>;
+  findById(id: number): Promise<UserDto | null>;
+  findByGamerTag(gamer_tag: string): Promise<User | null>;
+  findByEmail(email: string): Promise<User | null>;
+  findAll(): Promise<UserDto[]>;
   create(user: User): Promise<User>;
-  update(user: User): Promise<boolean>;
-  deactivate(id: number): Promise<boolean>;
+  update(id: number, fields: Partial<User>): Promise<boolean>;
+  updateRole(id: number, role: string): Promise<boolean>;
 }

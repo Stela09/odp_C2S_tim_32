@@ -8,7 +8,7 @@ export class Tournament{
         public registration_deadline: Date = new Date(),
         public starts_at: Date = new Date(),
         public prize_pool: number | null = null,
-        public status: "upcoming" | "activate" | "completed" | "cancelled" = "upcoming",
+        public status: "upcoming" | "active" | "completed" | "cancelled" = "upcoming",
         public created_at: Date = new Date(),
     ) { }
 }
