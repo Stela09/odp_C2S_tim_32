@@ -17,14 +17,18 @@ export class EntityService implements IEntityService {
     return this.entityRepo.findById(id);
   }
 
-  async getByUserId(userId: number): Promise<EntityDto[]> {
-    return this.entityRepo.findByUserId(userId);
+  async getByGameId(gameId: number): Promise<EntityDto[]> {
+    return this.entityRepo.findByGameId(gameId);
+  }
+
+  async getByStatus(status: string): Promise<EntityDto[]>{
+    return this.entityRepo.findByStatus(status);
   }
 
   async create(dto: CreateEntityDto): Promise<EntityDto | null> {
     const created = await this.entityRepo.create(dto);
     if (created.id === 0) return null;
-    return new EntityDto(created.id, created.userId, created.status, created.createdAt);
+    return this.entityRepo.findById(created.id);
   }
 
   async update(id: number, fields: Partial<EntityDto>): Promise<boolean> {

@@ -7,7 +7,7 @@ export class User {
     public full_name: string    = "",
     public email: string        = "",
     public password_hash: string = "",
-    public profil_image: string | null = null,
+    public profile_image: string | null = null,
     public role: UserRole       = UserRole.USER,
     public createdAt: Date      = new Date(),
   ) {}

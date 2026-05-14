@@ -10,24 +10,25 @@ export class AuthService implements IAuthService {
 
   public constructor(private readonly userRepo: IUserRepository) {}
 
-  async login(username: string, password: string): Promise<AuthUserDto> {
-    const user = await this.userRepo.findByUsername(username);
-    if (user.id === 0 || user.isActive === 0) return new AuthUserDto();
-    const match = await bcrypt.compare(password, user.passwordHash).catch(() => false);
+  async login(gamer_tag: string, password: string): Promise<AuthUserDto> {
+    const user = await this.userRepo.findByGamerTag(gamer_tag);
+    if (!user || user.id === 0) return new AuthUserDto();
+    const match = await bcrypt.compare(password, user.password_hash).catch(() => false);
     if (!match) return new AuthUserDto();
-    return new AuthUserDto(user.id, user.username, user.role);
+    return new AuthUserDto(user.id, user.gamer_tag, user.role);
   }
 
-  async register(username: string, email: string, role: string, password: string): Promise<AuthUserDto> {
-    const byName = await this.userRepo.findByUsername(username);
-    if (byName.id !== 0) return new AuthUserDto();
+  async register(gamer_tag: string, full_name: string, email: string, password: string, profile_image: string | null = null): Promise<AuthUserDto> {
+    const byTag = await this.userRepo.findByGamerTag(gamer_tag);
+    if (byTag && byTag.id !== 0) return new AuthUserDto();
     const byEmail = await this.userRepo.findByEmail(email);
-    if (byEmail.id !== 0) return new AuthUserDto();
+    if (byEmail && byEmail.id !== 0) return new AuthUserDto();
     const hash = await bcrypt.hash(password, this.saltRounds).catch(() => "");
     if (!hash) return new AuthUserDto();
-    const userRole = role === UserRole.ADMIN ? UserRole.ADMIN : UserRole.USER;
-    const created = await this.userRepo.create(new User(0, username, email, userRole, hash));
+    const created = await this.userRepo.create(
+      new User(0, gamer_tag, full_name, email, hash, profile_image)
+    );
     if (created.id === 0) return new AuthUserDto();
-    return new AuthUserDto(created.id, created.username, created.role);
+    return new AuthUserDto(created.id, created.gamer_tag, created.role);
   }
 }

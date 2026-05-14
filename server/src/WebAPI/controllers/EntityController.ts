@@ -1,25 +1,31 @@
-// TODO: Replace Entity with your domain resource name and adjust routes/roles accordingly
 import { Request, Response, Router } from "express";
 import { IEntityService } from "../../Domain/services/entity/IEntityService";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
+import { CreateEntityDto } from "../../Domain/DTOs/entity/CreateEntityDto";
 
 export class EntityController {
   private readonly router = Router();
 
   public constructor(private readonly entityService: IEntityService) {
-    this.router.get("/entities",          authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getAll.bind(this));
-    this.router.get("/entities/:id",      authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getById.bind(this));
-    this.router.get("/entities/user/:userId", authenticate, authorize(UserRole.ADMIN, UserRole.USER), this.getByUserId.bind(this));
-    this.router.post("/entities",         authenticate, authorize(UserRole.USER), this.create.bind(this));
-    this.router.patch("/entities/:id",    authenticate, authorize(UserRole.ADMIN), this.update.bind(this));
-    this.router.delete("/entities/:id",   authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
+    this.router.get("/tournaments",              this.getAll.bind(this));
+    this.router.get("/tournaments/:id",          this.getById.bind(this));
+    this.router.get("/tournaments/game/:gameId", this.getByGameId.bind(this));
+    this.router.post("/tournaments",             authenticate, authorize(UserRole.ADMIN), this.create.bind(this));
+    this.router.patch("/tournaments/:id",        authenticate, authorize(UserRole.ADMIN), this.update.bind(this));
+    this.router.delete("/tournaments/:id",       authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
-    const page  = parseInt(req.query.page  as string ?? "1",  10);
-    const limit = parseInt(req.query.limit as string ?? "20", 10);
+    const page   = parseInt(req.query.page  as string ?? "1",  10);
+    const limit  = parseInt(req.query.limit as string ?? "20", 10);
+    const status = req.query.status as string | undefined;
+    if (status) {
+      const items = await this.entityService.getByStatus(status);
+      res.status(200).json({ success: true, data: items });
+      return;
+    }
     const result = await this.entityService.getAll(page, limit);
     res.status(200).json({ success: true, data: result });
   }
@@ -28,21 +34,27 @@ export class EntityController {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
     const entity = await this.entityService.getById(id);
-    if (!entity) { res.status(404).json({ success: false, message: "Not found" }); return; }
+    if (!entity) { res.status(404).json({ success: false, message: "Tournament not found" }); return; }
     res.status(200).json({ success: true, data: entity });
   }
 
-  private async getByUserId(req: Request, res: Response): Promise<void> {
-    const userId = parseInt(req.params.userId as string, 10);
-    if (isNaN(userId)) { res.status(400).json({ success: false, message: "Invalid userId" }); return; }
-    const items = await this.entityService.getByUserId(userId);
+  private async getByGameId(req: Request, res: Response): Promise<void> {
+    const gameId = parseInt(req.params.gameId as string, 10);
+    if (isNaN(gameId)) { res.status(400).json({ success: false, message: "Invalid gameId" }); return; }
+    const items = await this.entityService.getByGameId(gameId);
     res.status(200).json({ success: true, data: items });
   }
 
   private async create(req: Request, res: Response): Promise<void> {
-    // TODO: Validate req.body and build CreateEntityDto from it
-    const created = await this.entityService.create({ userId: req.user!.id });
-    if (!created) { res.status(500).json({ success: false, message: "Failed to create" }); return; }
+    const { game_id, name, format, max_teams, registration_deadline, starts_at, prize_pool } = req.body;
+    if (!game_id || !name || !format || !max_teams || !registration_deadline || !starts_at) {
+      res.status(400).json({ success: false, message: "Sva obavezna polja moraju biti popunjena" });
+      return;
+    }
+    const dto = new CreateEntityDto(game_id, name, format, max_teams,
+      new Date(registration_deadline), new Date(starts_at), prize_pool ?? null);
+    const created = await this.entityService.create(dto);
+    if (!created) { res.status(500).json({ success: false, message: "Failed to create tournament" }); return; }
     res.status(201).json({ success: true, data: created });
   }
 

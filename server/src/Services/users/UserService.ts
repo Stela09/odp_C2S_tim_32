@@ -6,17 +6,14 @@ export class UserService implements IUserService {
   public constructor(private readonly userRepo: IUserRepository) {}
 
   async getAll(): Promise<UserDto[]> {
-    const users = await this.userRepo.findAll();
-    return users.map((u) => new UserDto(u.id, u.username, u.email, u.role, u.isActive));
+    return this.userRepo.findAll();
   }
 
   async getById(id: number): Promise<UserDto | null> {
-    const u = await this.userRepo.findById(id);
-    if (u.id === 0) return null;
-    return new UserDto(u.id, u.username, u.email, u.role, u.isActive);
+    return this.userRepo.findById(id);
   }
 
-  async deactivate(id: number): Promise<boolean> {
-    return this.userRepo.deactivate(id);
+  async updateRole(id: number, role: string): Promise<boolean> {
+    return this.userRepo.updateRole(id, role);
   }
 }
