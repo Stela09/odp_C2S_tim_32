@@ -14,13 +14,13 @@ export class AuthController {
   }
 
   private async login(req: Request, res: Response): Promise<void> {
-    const { username, password } = req.body as { username?: string; password?: string };
-    const v: ValidationResult = validateLogin(username ?? "", password ?? "");
+    const {gamer_tag, password } = req.body as { gamer_tag?: string; password?: string };
+    const v: ValidationResult = validateLogin(gamer_tag ?? "", password ?? "");
     if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
-    const result = await this.authService.login(username!, password!);
+    const result = await this.authService.login(gamer_tag!, password!);
     if (result.id === 0) { res.status(401).json({ success: false, message: "Invalid username or password" }); return; }
     const token = jwt.sign(
-      { id: result.id, username: result.username, role: result.role },
+      { id: result.id, gamer_tag: result.gamer_tag, role: result.role },
       process.env.JWT_SECRET ?? "",
       { expiresIn: "24h" }
     );
@@ -28,13 +28,14 @@ export class AuthController {
   }
 
   private async register(req: Request, res: Response): Promise<void> {
-    const { username, email, password, role } = req.body as { username?: string; email?: string; password?: string; role?: string };
-    const v: ValidationResult = validateRegister(username ?? "", email ?? "", password ?? "");
+    const { gamer_tag, full_name, email, password, profile_image } = req.body as { 
+      gamer_tag?: string; full_name?: string; email?: string; password?: string; profile_image?: string;};
+    const v: ValidationResult = validateRegister(gamer_tag ?? "", full_name ?? "", email ?? "", password ?? "");
     if (!v.valid) { res.status(400).json({ success: false, message: v.message }); return; }
-    const result = await this.authService.register(username!, email!, role ?? "user", password!);
-    if (result.id === 0) { res.status(409).json({ success: false, message: "Username or email already taken" }); return; }
+    const result = await this.authService.register(gamer_tag!, full_name!, email!, password!, profile_image ?? null);
+    if (result.id === 0) { res.status(409).json({ success: false, message: "Gamer tag or email already taken" }); return; }
     const token = jwt.sign(
-      { id: result.id, username: result.username, role: result.role },
+      { id: result.id, gamer_tag: result.gamer_tag, role: result.role },
       process.env.JWT_SECRET ?? "",
       { expiresIn: "24h" }
     );

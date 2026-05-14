@@ -1,7 +1,7 @@
 // TODO: Replace with the fields needed to create your domain entity
 export class CreateEntityDto {
   constructor(
-    public gameId: number               = 0,
+    public game_id: number               = 0,
     // add your creation fields here
     public name: string                 = "",
     public format: "single_elimination" | "double_elimination" | "round_robin" = "single_elimination",

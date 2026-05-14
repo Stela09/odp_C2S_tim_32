@@ -90,8 +90,7 @@ export class EntityRepository implements IEntityRepository {
         [dto.game_id, dto.name, dto.format, dto.max_teams, dto.registration_deadline, dto.starts_at, dto.prize_pool]
       );
       if (result.insertId === 0) return new Entity();
-      return new Entity(result.insertId, dto.game_id, dto.name, dto.format, dto.max_teams,
-        dto.registration_deadline, dto.starts_at, dto.prize_pool);
+      return new Entity(result.insertId, dto.game_id, EntityStatus.PENDING);
     } catch (err) {
       this.logger.error("EntityRepository", "create failed", err);
       return new Entity();
