@@ -12,8 +12,11 @@ export class AuthService implements IAuthService {
 
   async login(gamer_tag: string, password: string): Promise<AuthUserDto> {
     const user = await this.userRepo.findByGamerTag(gamer_tag);
+    console.log("Found user:", user);
     if (!user || user.id === 0) return new AuthUserDto();
+    console.log("Hash from DB:", user.password_hash);
     const match = await bcrypt.compare(password, user.password_hash).catch(() => false);
+    console.log("Password match:", match);
     if (!match) return new AuthUserDto();
     return new AuthUserDto(user.id, user.gamer_tag, user.role);
   }
