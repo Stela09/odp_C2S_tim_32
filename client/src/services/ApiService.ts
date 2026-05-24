@@ -48,4 +48,35 @@ export const apiService = {
     });
     return res.json();
   },
+
+   async getMyTeams(token: string) {
+    const res = await fetch(`${API_URL}/teams`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  async createTeam(name: string, tag: string, description: string, token: string) {
+    const res = await fetch(`${API_URL}/teams`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify({ name, tag, description }),
+    });
+    return res.json();
+  },
+
+  async createTournament(data: object, token: string) {
+    const res = await fetch(`${API_URL}/tournaments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
 };

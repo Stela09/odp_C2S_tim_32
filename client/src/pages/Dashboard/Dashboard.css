@@ -1,0 +1,99 @@
+.dashboard-container {
+    min-height: 100vh;
+    background-color: #0d1117;
+    color: #ffffff;
+    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+}
+
+.dashboard-header h1 {
+    color: #00ffcc;
+    font-size: 1.5rem;
+    letter-spacing: 4px;
+}
+
+.logout-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: #00ffcc;
+    color: #0d1117;
+}
+
+.dashboard-main {
+    padding: 2rem;
+}
+
+.dashboard-main h2 {
+    color: #00ffcc;
+    margin-bottom: 1.5rem;
+}
+
+.empty {
+    color: #8b949e;
+}
+
+.tournament-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.tournament-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.3s ease;
+}
+
+.tournament-card:hover {
+    border-color: #00ffcc;
+}
+
+.tournament-card h3 {
+    color: #00ffcc;
+    margin-bottom: 0.5rem;
+}
+
+.tournament-card p {
+    color: #8b949e;
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+}
+
+nav {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    border-color: #00ffcc;
+    color: #00ffcc;
+}

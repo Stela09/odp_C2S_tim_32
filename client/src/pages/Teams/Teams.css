@@ -1,0 +1,193 @@
+.teams-container {
+    min-height: 100vh;
+    background-color: #0d1117;
+    color: #ffffff;
+    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+.teams-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+}
+
+.logo {
+    color: #00ffcc;
+    font-size: 1.5rem;
+    letter-spacing: 4px;
+    cursor: pointer;
+}
+
+.back-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    border-color: #00ffcc;
+    color: #00ffcc;
+}
+
+.teams-main {
+    padding: 2rem;
+}
+
+.teams-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.teams-top h2 {
+    color: #00ffcc;
+}
+
+.create-btn {
+    padding: 10px 20px;
+    background: #00ffcc;
+    color: #0d1117;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.create-btn:hover {
+    background: #00ccaa;
+}
+
+.create-form {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.create-form h3 {
+    color: #00ffcc;
+    margin-bottom: 1rem;
+}
+
+.create-form input, .create-form textarea {
+    width: 100%;
+    padding: 10px 14px;
+    margin-bottom: 1rem;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+}
+
+.create-form input:focus, .create-form textarea:focus {
+    outline: none;
+    border-color: #00ffcc;
+}
+
+.create-form textarea {
+    height: 80px;
+    resize: vertical;
+}
+
+.submit-btn {
+    padding: 10px 24px;
+    background: #00ffcc;
+    color: #0d1117;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background: #00ccaa;
+}
+
+.empty {
+    color: #8b949e;
+}
+
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.team-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.3s ease;
+}
+
+.team-card:hover {
+    border-color: #00ffcc;
+}
+
+.team-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.team-card-header h3 {
+    color: #00ffcc;
+}
+
+.team-tag {
+    background: #1f3a5f;
+    color: #58a6ff;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.team-desc {
+    color: #8b949e;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.team-members {
+    border-top: 1px solid #30363d;
+    padding-top: 0.75rem;
+}
+
+.members-title {
+    color: #8b949e;
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.member-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    margin: 2px;
+}
+
+.member-badge.captain {
+    background: #2a1f3a;
+    color: #a371f7;
+}
+
+.member-badge.member {
+    background: #1a2a1a;
+    color: #3fb950;
+}
