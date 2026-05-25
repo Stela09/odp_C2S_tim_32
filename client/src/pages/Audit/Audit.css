@@ -1,0 +1,39 @@
+.audit-container {
+    min-height: 100vh;
+    background-color: #0d1117;
+    color: #ffffff;
+    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+.audit-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 2rem;
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+}
+
+.logo { color: #00ffcc; font-size: 1.5rem; letter-spacing: 4px; cursor: pointer; flex: 1; }
+.admin-badge { background: #2a1f3a; color: #a371f7; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+.back-btn { padding: 8px 16px; background: transparent; border: 1px solid #30363d; color: #8b949e; border-radius: 8px; cursor: pointer; }
+.back-btn:hover { border-color: #00ffcc; color: #00ffcc; }
+
+.audit-main { padding: 2rem; }
+.audit-main h2 { color: #00ffcc; margin-bottom: 1.5rem; }
+
+.audit-table-wrap { overflow-x: auto; }
+
+.audit-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.audit-table th { text-align: left; padding: 12px 16px; color: #8b949e; border-bottom: 1px solid #30363d; }
+.audit-table td { padding: 12px 16px; border-bottom: 1px solid #21262d; color: #c9d1d9; }
+.audit-table tr:hover td { background: #161b22; }
+
+.action-badge { background: #1f3a5f; color: #58a6ff; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; }
+
+.empty { text-align: center; color: #8b949e; padding: 2rem; }
+
+.pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+.page-btn { padding: 8px 16px; background: transparent; border: 1px solid #30363d; color: #8b949e; border-radius: 8px; cursor: pointer; }
+.page-btn:hover:not(:disabled) { border-color: #00ffcc; color: #00ffcc; }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }

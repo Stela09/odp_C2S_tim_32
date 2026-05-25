@@ -1,0 +1,106 @@
+.health-container {
+    min-height: 100vh;
+    background-color: #0d1117;
+    color: #ffffff;
+    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+.health-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 2rem;
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+}
+
+.logo {
+    color: #00ffcc;
+    font-size: 1.5rem;
+    letter-spacing: 4px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.admin-badge {
+    background: #2a1f3a;
+    color: #a371f7;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.back-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover { border-color: #00ffcc; color: #00ffcc; }
+
+.health-main { padding: 2rem; }
+
+.health-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.health-top h2 { color: #00ffcc; }
+
+.refresh-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover { background: #00ffcc; color: #0d1117; }
+
+.health-section { margin-bottom: 2rem; }
+
+.health-section h3 {
+    color: #8b949e;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+}
+
+.nodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.node-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.node-card.status-healthy { border-color: #3fb950; }
+.node-card.status-degraded { border-color: #d29922; }
+.node-card.status-offline { border-color: #f85149; }
+
+.node-icon { font-size: 1.5rem; }
+
+.node-info h4 { color: #c9d1d9; margin-bottom: 0.25rem; }
+
+.node-status { font-size: 0.85rem; color: #8b949e; }
+.node-latency { font-size: 0.8rem; color: #8b949e; }
+
+.empty { color: #8b949e; }

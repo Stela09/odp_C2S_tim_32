@@ -50,6 +50,7 @@ const AdminPage = () => {
 
     useEffect(() => {
         if (!token) { navigate('/login'); return; }
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadData();
     }, [navigate, tab, loadData, token]);
 
@@ -86,6 +87,8 @@ const AdminPage = () => {
                 <h1 onClick={() => navigate('/dashboard')} className="logo">PULSE GRID</h1>
                 <span className="admin-badge">ADMIN</span>
                 <button onClick={() => navigate('/dashboard')} className="back-btn">← Dashboard</button>
+                <button onClick={() => navigate('/health')} className="back-btn">Health</button>
+                <button onClick={() => navigate('/audit')} className="back-btn">Audit Log</button>
             </header>
 
             <div className="admin-tabs">

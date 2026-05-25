@@ -79,4 +79,25 @@ export const apiService = {
     });
     return res.json();
   },
+
+  async getDbHealth(token: string) {
+    const res = await fetch(`${API_URL}/health/db`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  async getApiHealth(token: string) {
+    const res = await fetch(`${API_URL}/health/api`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  async getAuditLogs(token: string, page = 1, limit = 20) {
+    const res = await fetch(`${API_URL}/audits/logs?page=${page}&limit=${limit}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
 };
