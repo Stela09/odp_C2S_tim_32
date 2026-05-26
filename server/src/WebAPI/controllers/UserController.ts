@@ -3,11 +3,15 @@ import { IUserService } from "../../Domain/services/users/IUserService";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
+import { AuditRepository } from "../../Database/repositories/audit/AuditRepository";
 
 export class UserController {
   private readonly router = Router();
 
-  public constructor(private readonly userService: IUserService) {
+  public constructor(
+    private readonly userService: IUserService,
+    private readonly auditRepo?: AuditRepository
+  ) {
     this.router.get("/users",          authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
     this.router.get("/users/:id",      this.getById.bind(this));
     this.router.patch("/users/:id/role", authenticate, authorize(UserRole.ADMIN), this.updateRole.bind(this));
@@ -35,6 +39,9 @@ export class UserController {
       return;
     }
     const ok = await this.userService.updateRole(id, role);
+    if (ok) {
+      await this.auditRepo?.log(req.user?.id ?? null, "UPDATE_ROLE", "user", id);
+    }
     res.status(ok ? 200 : 500).json({ success: ok, message: ok ? "Role updated" : "Failed to update role" });
   }
 

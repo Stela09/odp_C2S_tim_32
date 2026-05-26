@@ -138,6 +138,28 @@ export class DbManager {
   }
 
   public async getReadConnection(): Promise<{ conn: PoolConnection; nodeName: string } | null> {
+    const healthySlaves = this.slaves.filter((s) => s.node.status === NodeStatus.HEALTHY);
+    const degradedSlaves = this.slaves.filter((s) => s.node.status === NodeStatus.DEGRADED);
+    const candidates = healthySlaves.length > 0 ? healthySlaves : degradedSlaves;
+
+    if (candidates.length === 0) {
+      return this.getWriteConnection();
+    }
+
+    for (let i = 0; i < candidates.length; i++) {
+      const candidate = candidates[this.slaveRrIndex % candidates.length];
+      this.slaveRrIndex = (this.slaveRrIndex + 1) % candidates.length;
+
+      try {
+        const conn = await candidate.pool.getConnection();
+        return { conn, nodeName: candidate.name };
+      } catch (err) {
+        candidate.node.status = NodeStatus.OFFLINE;
+        candidate.node.failedWrites++;
+        this.logger.warn("DB", `Read node ${candidate.name} unavailable, trying next node`);
+      }
+    }
+
     return this.getWriteConnection();
   }
 

@@ -10,6 +10,7 @@ interface AuditLog {
     entity_type: string | null;
     entity_id: number | null;
     created_at: string;
+    gamer_tag?: string | null;
 }
 
 const AuditPage = () => {
@@ -73,7 +74,7 @@ const AuditPage = () => {
                                     ) : logs.map(log => (
                                         <tr key={log.id}>
                                             <td>{log.id}</td>
-                                            <td>{log.user_id ?? '-'}</td>
+                                            <td>{log.gamer_tag ?? log.user_id ?? '-'}</td>
                                             <td><span className="action-badge">{log.action}</span></td>
                                             <td>{log.entity_type ? `${log.entity_type} #${log.entity_id}` : '-'}</td>
                                             <td>{new Date(log.created_at).toLocaleString()}</td>

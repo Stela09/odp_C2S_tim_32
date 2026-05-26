@@ -8,6 +8,7 @@ import { DbManager } from "./Database/connection/DbConnectionPool";
 
 import { UserRepository } from "./Database/repositories/users/UserRepository";
 import { EntityRepository } from "./Database/repositories/entity/EntityRepository";
+import { AuditRepository } from "./Database/repositories/audit/AuditRepository";
 
 import { AuthService } from "./Services/auth/AuthService";
 import { UserService } from "./Services/users/UserService";
@@ -22,12 +23,14 @@ import { WatchlistController } from "./WebAPI/controllers/WatchlistController";
 import { TournamentRegistrationController } from "./WebAPI/controllers/TournamentRegistrationController";
 import { HealthController } from "./WebAPI/controllers/HealthController";
 import { AuditController } from "./WebAPI/controllers/AuditController";
+import { MatchController } from "./WebAPI/controllers/MatchController";
 
 export const logger = new ConsoleLoggerService();
 export const db = new DbManager(logger);
 
 const userRepo = new UserRepository(db, logger);
 const entityRepo = new EntityRepository(db, logger);
+const auditRepo = new AuditRepository(db, logger);
 
 const authService = new AuthService(userRepo);
 const userService = new UserService(userRepo);
@@ -61,6 +64,8 @@ app.post("/api/v1/auth/register", async (req, res) => {
     });
     return;
   }
+
+  await auditRepo.log(result.id, "REGISTER", "user", result.id);
 
   const token = jwt.sign(
     { id: result.id, gamer_tag: result.gamer_tag, role: result.role },
@@ -96,6 +101,8 @@ app.post("/api/v1/auth/login", async (req, res) => {
     return;
   }
 
+  await auditRepo.log(result.id, "LOGIN", "user", result.id);
+
   const token = jwt.sign(
     { id: result.id, gamer_tag: result.gamer_tag, role: result.role },
     process.env.JWT_SECRET || "pulse_grid_secret_123",
@@ -109,13 +116,35 @@ app.post("/api/v1/auth/login", async (req, res) => {
   });
 });
 
-app.use("/api/v1", new AuthController(authService).getRouter());
-app.use("/api/v1", new UserController(userService).getRouter());
-app.use("/api/v1", new EntityController(entityService).getRouter());
+app.post("/api/v1/auth/logout", async (req, res) => {
+  const header = req.headers.authorization;
+  if (header?.startsWith("Bearer ")) {
+    try {
+      const decoded = jwt.verify(
+        header.slice(7),
+        process.env.JWT_SECRET || "pulse_grid_secret_123"
+      ) as { id?: number };
 
-app.use("/api/v1", new TeamController(db).getRouter());
-app.use("/api/v1", new WatchlistController(db).getRouter());
-app.use("/api/v1", new TournamentRegistrationController(db).getRouter());
+      if (decoded.id) {
+        await auditRepo.log(decoded.id, "LOGOUT", "user", decoded.id);
+      }
+    } catch {
+      res.status(401).json({ success: false, message: "Invalid token" });
+      return;
+    }
+  }
+
+  res.status(200).json({ success: true, message: "Logout successful" });
+});
+
+app.use("/api/v1", new AuthController(authService).getRouter());
+app.use("/api/v1", new UserController(userService, auditRepo).getRouter());
+app.use("/api/v1", new EntityController(entityService, auditRepo).getRouter());
+
+app.use("/api/v1", new TeamController(db, auditRepo).getRouter());
+app.use("/api/v1", new WatchlistController(db, auditRepo).getRouter());
+app.use("/api/v1", new TournamentRegistrationController(db, auditRepo).getRouter());
+app.use("/api/v1", new MatchController(db, auditRepo).getRouter());
 app.use("/api/v1", new HealthController(db).getRouter());
 app.use("/api/v1", new AuditController(db).getRouter());
 

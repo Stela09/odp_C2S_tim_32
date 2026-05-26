@@ -1,42 +1,27 @@
-Da, README je još template. Zameni ceo `README.md` ovim:
-
-```md
 # Pulse Grid
 
-Pulse Grid je full-stack aplikacija za upravljanje esport turnirima, timovima, watchlist-om i admin pregledima.
+Pulse Grid je aplikacija za organizaciju esports turnira, timova, prijava, rasporeda meceva, watchlist-a, health pregleda i audit loga.
 
 ## Tehnologije
 
 - Frontend: React + TypeScript + Vite
 - Backend: Node.js + Express + TypeScript
-- Baza: MySQL master + 2 slave čvora preko Docker-a
+- Baza: MySQL master + 2 slave cvora preko Docker-a
 - Auth: JWT + bcrypt
 - Role: `player` i `admin`
 
-## Struktura projekta
+## Pokretanje
 
-```txt
-client/                 React frontend
-server/                 Express backend
-docker/                 Docker konfiguracija za MySQL master/slave
-DB_Upiti.sql            SQL šema baze
-docker-compose.yml      Docker compose konfiguracija
-```
+Sve komande se pokrecu iz glavnog foldera projekta.
 
-## Pokretanje od nule
-
-Sve komande se pokreću iz glavnog foldera projekta.
-
-### 1. Resetuj i pokreni Docker bazu
+### 1. Baza
 
 ```powershell
 docker compose down -v
 docker compose up -d --build
 ```
 
-Sačekati 20-30 sekundi da se MySQL čvorovi podignu.
-
-### 2. Pokreni setup replikacije i šeme
+Sacekati 20-30 sekundi, pa pokrenuti:
 
 ```powershell
 docker cp docker/setup-replication.sh project_master:/setup.sh
@@ -49,23 +34,22 @@ Provera tabela:
 docker exec -i project_master mysql -uroot -proot1234 PULSE_GRID -e "SHOW TABLES;"
 ```
 
-Očekivane tabele:
+Bitne tabele:
 
 ```txt
-audit_logs
-games
-matches
-team_members
-teams
-tournament_registrations
-tournaments
-user_watchlist
 users
+games
+teams
+team_members
+tournaments
+tournament_registrations
+matches
+match_players
+user_watchlist
+audit_logs
 ```
 
-### 3. Pokreni backend
-
-U prvom terminalu:
+### 2. Backend
 
 ```powershell
 cd server
@@ -79,9 +63,7 @@ Backend radi na:
 http://localhost:4000/api/v1
 ```
 
-### 4. Pokreni frontend
-
-U drugom terminalu:
+### 3. Frontend
 
 ```powershell
 cd client
@@ -95,93 +77,56 @@ Frontend radi na:
 http://localhost:5173
 ```
 
-## .env za server
+## Test korisnik
 
-U `server/.env` treba da stoji:
-
-```env
-DB_MASTER_HOST=localhost
-DB_MASTER_PORT=3306
-DB_MASTER_USER=root
-DB_MASTER_PASSWORD=root1234
-DB_MASTER_NAME=PULSE_GRID
-
-DB_SLAVE1_HOST=localhost
-DB_SLAVE1_PORT=3307
-DB_SLAVE1_USER=root
-DB_SLAVE1_PASSWORD=root1234
-DB_SLAVE1_NAME=PULSE_GRID
-
-DB_SLAVE2_HOST=localhost
-DB_SLAVE2_PORT=3308
-DB_SLAVE2_USER=root
-DB_SLAVE2_PASSWORD=root1234
-DB_SLAVE2_NAME=PULSE_GRID
-
-PORT=4000
-CLIENT_URL=http://localhost:5173
-
-JWT_SECRET=project__is_a_great_one_i_guess
-SALT_ROUNDS=10
-HEALTH_CHECK_INTERVAL=10000
-```
-
-## Test korisnika
-
-Posle resetovanja baze nema korisnika. Prvo se registruje novi korisnik kroz frontend ili API.
-
-Primer preko API-ja:
+Ako baza nema korisnika, napravi korisnika:
 
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:4000/api/v1/auth/register" -Method POST -ContentType "application/json" -Body '{"gamer_tag":"admin1","full_name":"Admin Test","email":"admin1@gmail.com","password":"Admin1234"}'
 ```
 
-Da bi korisnik postao admin:
+Postavi ga kao admina:
 
 ```powershell
 docker exec -i project_master mysql -uroot -proot1234 PULSE_GRID -e "UPDATE users SET role='admin' WHERE gamer_tag='admin1';"
 ```
 
-Login podaci:
+Login:
 
 ```txt
 Gamer tag: admin1
 Lozinka: Admin1234
 ```
 
-## Osnovni tok za proveru
 
-1. Registruj korisnika.
-2. Postavi korisnika kao admina.
-3. Uloguj se na frontend.
-4. Kreiraj turnir kroz admin stranicu.
-5. Kreiraj tim kroz timovi stranicu.
-6. Prijavi tim na turnir.
-7. Dodaj turnir na watchlist.
-8. Proveri health stranicu.
+## Distribuirani deo
+
+- Pisanje ide na MySQL master.
+- Citanje ide preko `getReadConnection()` na zdrave slave cvorove round-robin logikom.
+- Ako slave cvorovi nisu dostupni, citanje pada nazad na master.
+- Health check periodocno proverava master i oba slave cvora.
 
 ## Korisne provere
 
-Provera turnira kroz API:
-
-```powershell
-Invoke-RestMethod -Uri "http://localhost:4000/api/v1/tournaments" -Method GET
-```
-
-Provera prijavljenih timova:
+Provera prijava:
 
 ```powershell
 docker exec -i project_master mysql -uroot -proot1234 PULSE_GRID -e "SELECT * FROM tournament_registrations;"
 ```
 
-Provera korisnika:
+Provera meceva:
 
 ```powershell
-docker exec -i project_master mysql -uroot -proot1234 PULSE_GRID -e "SELECT id, gamer_tag, email, role FROM users;"
+docker exec -i project_master mysql -uroot -proot1234 PULSE_GRID -e "SELECT * FROM matches;"
+```
+
+Provera audit loga:
+
+```powershell
+docker exec -i project_master mysql -uroot -proot1234 PULSE_GRID -e "SELECT action, entity_type, entity_id, created_at FROM audit_logs ORDER BY id DESC LIMIT 20;"
 ```
 
 ## Napomena
 
-Ako se radi `docker compose down -v`, briše se cela baza i svi korisnici. Nakon toga treba ponovo pokrenuti `setup-replication.sh`, registrovati korisnika i po potrebi ga postaviti kao admina.
-```
+Ako se pokrene `docker compose down -v`, brise se cela baza. Posle toga treba ponovo pokrenuti `setup-replication.sh`, registrovati korisnika i po potrebi ga postaviti kao admina.
 

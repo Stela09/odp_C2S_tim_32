@@ -11,6 +11,14 @@ export const apiService = {
     return res.json();
   },
 
+  async logout(token: string) {
+    const res = await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
   async register(gamer_tag: string, full_name: string, email: string, password: string, profile_image?: string | null) {
     const res = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
@@ -39,7 +47,7 @@ export const apiService = {
 
   async updateUserRole(id: number, role: string, token: string) {
     const res = await fetch(`${API_URL}/users/${id}/role`, {
-      method: "PUT",
+      method: "PATCH",
       headers: { 
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}` 
@@ -76,6 +84,31 @@ export const apiService = {
         Authorization: `Bearer ${token}`
       },
       body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
+  async getTournamentMatches(tournamentId: number) {
+    const res = await fetch(`${API_URL}/matches/tournament/${tournamentId}`);
+    return res.json();
+  },
+
+  async generateBracket(tournamentId: number, token: string) {
+    const res = await fetch(`${API_URL}/tournaments/${tournamentId}/generate-bracket`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  async updateMatchResult(matchId: number, score: string, winner_id: number, token: string) {
+    const res = await fetch(`${API_URL}/matches/${matchId}/result`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ score, winner_id }),
     });
     return res.json();
   },

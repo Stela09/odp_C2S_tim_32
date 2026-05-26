@@ -2,11 +2,15 @@ import { Request, Response, Router } from "express";
 import { RowDataPacket } from "mysql2";
 import { DbManager } from "../../Database/connection/DbConnectionPool";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
+import { AuditRepository } from "../../Database/repositories/audit/AuditRepository";
 
 export class TournamentRegistrationController {
   private readonly router = Router();
 
-  public constructor(private readonly db: DbManager) {
+  public constructor(
+    private readonly db: DbManager,
+    private readonly auditRepo?: AuditRepository
+  ) {
     this.router.post("/tournaments/:id/register", authenticate, this.registerTeam.bind(this));
   }
 
@@ -59,6 +63,7 @@ export class TournamentRegistrationController {
         [teamId, tournamentId]
       );
 
+      await this.auditRepo?.log(userId, "REGISTER_TEAM", "tournament", tournamentId);
       res.status(201).json({ success: true, message: "Tim je prijavljen na turnir" });
     } catch {
       res.status(409).json({ success: false, message: "Tim je već prijavljen ili prijava nije uspela" });

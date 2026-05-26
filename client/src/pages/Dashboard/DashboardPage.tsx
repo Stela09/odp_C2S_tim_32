@@ -24,7 +24,11 @@ const DashboardPage = () => {
         }).finally(() => setLoading(false));
     }, [navigate]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            await apiService.logout(token).catch(() => null);
+        }
         localStorage.removeItem('token');
         navigate('/login');
     };

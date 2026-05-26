@@ -2,11 +2,15 @@ import { Request, Response, Router } from "express";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
 import { DbManager } from "../../Database/connection/DbConnectionPool";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
+import { AuditRepository } from "../../Database/repositories/audit/AuditRepository";
 
 export class TeamController {
   private readonly router = Router();
 
-  public constructor(private readonly db: DbManager) {
+  public constructor(
+    private readonly db: DbManager,
+    private readonly auditRepo?: AuditRepository
+  ) {
     this.router.get("/teams", authenticate, this.getMyTeams.bind(this));
     this.router.post("/teams", authenticate, this.create.bind(this));
     this.router.get("/teams/:id", this.getById.bind(this));
@@ -110,6 +114,7 @@ export class TeamController {
       );
 
       await dbRes.conn.commit();
+      await this.auditRepo?.log(userId, "CREATE_TEAM", "team", result.insertId);
 
       res.status(201).json({
         success: true,

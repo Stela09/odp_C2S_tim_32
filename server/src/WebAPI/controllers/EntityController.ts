@@ -4,11 +4,15 @@ import { authenticate } from "../../Middlewares/authentification/AuthMiddleware"
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/UserRole";
 import { CreateEntityDto } from "../../Domain/DTOs/entity/CreateEntityDto";
+import { AuditRepository } from "../../Database/repositories/audit/AuditRepository";
 
 export class EntityController {
   private readonly router = Router();
 
-  public constructor(private readonly entityService: IEntityService) {
+  public constructor(
+    private readonly entityService: IEntityService,
+    private readonly auditRepo?: AuditRepository
+  ) {
     this.router.get("/tournaments",              this.getAll.bind(this));
     this.router.get("/tournaments/:id",          this.getById.bind(this));
     this.router.get("/tournaments/game/:gameId", this.getByGameId.bind(this));
@@ -59,6 +63,7 @@ export class EntityController {
     const created = await this.entityService.create(dto);
     console.log("Created result:", created);
     if (!created) { res.status(500).json({ success: false, message: "Failed to create tournament" }); return; }
+    await this.auditRepo?.log(req.user?.id ?? null, "CREATE_TOURNAMENT", "tournament", created.id);
     res.status(201).json({ success: true, data: created });
   }
 
@@ -66,6 +71,9 @@ export class EntityController {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
     const ok = await this.entityService.update(id, req.body);
+    if (ok) {
+      await this.auditRepo?.log(req.user?.id ?? null, "UPDATE_TOURNAMENT", "tournament", id);
+    }
     res.status(ok ? 200 : 500).json({ success: ok });
   }
 
@@ -73,6 +81,9 @@ export class EntityController {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
     const ok = await this.entityService.delete(id);
+    if (ok) {
+      await this.auditRepo?.log(req.user?.id ?? null, "DELETE_TOURNAMENT", "tournament", id);
+    }
     res.status(ok ? 200 : 500).json({ success: ok });
   }
 

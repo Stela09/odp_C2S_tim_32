@@ -10,6 +10,22 @@ import AuditPage from './pages/Audit/AuditPage';
 import WatchlistPage from './pages/Watchlist/WatchlistPage';
 import './App.css';
 
+const isAdmin = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return false;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1] ?? ''));
+    return payload.role === 'admin';
+  } catch {
+    return false;
+  }
+};
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  return isAdmin() ? children : <Navigate to="/dashboard" />;
+};
+
 function App() {
   return (
     <BrowserRouter>
@@ -19,9 +35,9 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/tournaments" element={<TournamentsPage />} />
         <Route path="/teams" element={<TeamsPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/health" element={<HealthPage />} />
-        <Route path="/audit" element={<AuditPage />} />
+        <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
+        <Route path="/health" element={<AdminRoute><HealthPage /></AdminRoute>} />
+        <Route path="/audit" element={<AdminRoute><AuditPage /></AdminRoute>} />
         <Route path="/watchlist" element={<WatchlistPage />} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>

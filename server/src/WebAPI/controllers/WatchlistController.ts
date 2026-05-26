@@ -2,11 +2,15 @@ import { Request, Response, Router } from "express";
 import { RowDataPacket } from "mysql2";
 import { DbManager } from "../../Database/connection/DbConnectionPool";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
+import { AuditRepository } from "../../Database/repositories/audit/AuditRepository";
 
 export class WatchlistController {
   private readonly router = Router();
 
-  public constructor(private readonly db: DbManager) {
+  public constructor(
+    private readonly db: DbManager,
+    private readonly auditRepo?: AuditRepository
+  ) {
     this.router.get("/watchlist", authenticate, this.getWatchlist.bind(this));
     this.router.post("/tournaments/:id/watch", authenticate, this.watch.bind(this));
     this.router.delete("/tournaments/:id/watch", authenticate, this.unwatch.bind(this));
@@ -54,6 +58,7 @@ export class WatchlistController {
         [userId, tournamentId]
       );
 
+      await this.auditRepo?.log(userId, "WATCH_TOURNAMENT", "tournament", tournamentId);
       res.status(200).json({ success: true, message: "Tournament added to watchlist" });
     } finally {
       dbRes.conn.release();
@@ -76,6 +81,7 @@ export class WatchlistController {
         [userId, tournamentId]
       );
 
+      await this.auditRepo?.log(userId, "UNWATCH_TOURNAMENT", "tournament", tournamentId);
       res.status(200).json({ success: true, message: "Tournament removed from watchlist" });
     } finally {
       dbRes.conn.release();

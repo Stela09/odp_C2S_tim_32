@@ -13,8 +13,8 @@ export class AuditController {
   }
 
   private async getLogs(req: Request, res: Response): Promise<void> {
-    const page = Number(req.query.page ?? 1);
-    const limit = Number(req.query.limit ?? 20);
+    const page = Math.max(1, Number(req.query.page ?? 1) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit ?? 20) || 20));
     const offset = (page - 1) * limit;
 
     const dbRes = await this.db.getReadConnection();
@@ -29,14 +29,18 @@ export class AuditController {
          FROM audit_logs al
          LEFT JOIN users u ON u.id = al.user_id
          ORDER BY al.created_at DESC
-         LIMIT ? OFFSET ?`,
-        [limit, offset]
+         LIMIT ${limit} OFFSET ${offset}`
+      );
+
+      const [countRows] = await dbRes.conn.execute<RowDataPacket[]>(
+        `SELECT COUNT(*) AS total FROM audit_logs`
       );
 
       res.status(200).json({
         success: true,
         data: {
           items: rows,
+          total: Number(countRows[0]?.total ?? 0),
           page,
           limit,
         },

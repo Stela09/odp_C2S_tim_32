@@ -1,5 +1,5 @@
-import { Tournament } from '../models/Tournament';
-import { User } from '../models/User';
+import type { Tournament } from '../models/Tournament';
+import type { User } from '../models/User';
 
 const TOURNAMENT_KEY = "pulse_grid_tournaments";
 const USER_KEY = "pulse_grid_user";
