@@ -8,7 +8,7 @@ export class User {
     public email: string        = "",
     public password_hash: string = "",
     public profile_image: string | null = null,
-    public role: UserRole       = UserRole.USER,
+    public role: UserRole       = UserRole.PLAYER,
     public createdAt: Date      = new Date(),
   ) {}
 }

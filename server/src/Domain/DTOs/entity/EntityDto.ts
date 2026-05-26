@@ -11,7 +11,7 @@ export class EntityDto {
     public registration_deadline: Date  = new Date(),
     public starts_at: Date              = new Date(),
     public prize_pool: number | null    = null,
-    public status: EntityStatus         = EntityStatus.PENDING,
+    public status: EntityStatus         = EntityStatus.UPCOMING,
     public created_at: Date              = new Date(),
   ) {}
 }

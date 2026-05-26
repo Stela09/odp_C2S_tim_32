@@ -6,7 +6,7 @@ export class UserDto {
     public gamer_tag: string            = "",
     public full_name: string            = "",
     public email: string                = "",
-    public role: UserRole               = UserRole.USER,
+    public role: UserRole               = UserRole.PLAYER,
     public profile_image: string | null = null,
     public created_at: Date             = new Date(),
   ) {}

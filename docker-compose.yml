@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root1234
-      MYSQL_DATABASE: project_db
+      MYSQL_DATABASE: PULSE_GRID
     ports:
       - "3306:3306"
     volumes:
@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root1234
-      MYSQL_DATABASE: project_db
+      MYSQL_DATABASE: PULSE_GRID
     ports:
       - "3307:3306"
     volumes:
@@ -56,7 +56,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root1234
-      MYSQL_DATABASE: project_db
+      MYSQL_DATABASE: PULSE_GRID
     ports:
       - "3308:3306"
     volumes:

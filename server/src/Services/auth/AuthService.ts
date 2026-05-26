@@ -12,25 +12,26 @@ export class AuthService implements IAuthService {
 
   async login(gamer_tag: string, password: string): Promise<AuthUserDto> {
     const user = await this.userRepo.findByGamerTag(gamer_tag);
-    console.log("Found user:", user);
     if (!user || user.id === 0) return new AuthUserDto();
-    console.log("Hash from DB:", user.password_hash);
     const match = await bcrypt.compare(password, user.password_hash).catch(() => false);
-    console.log("Password match:", match);
     if (!match) return new AuthUserDto();
     return new AuthUserDto(user.id, user.gamer_tag, user.role);
   }
 
   async register(gamer_tag: string, full_name: string, email: string, password: string, profile_image: string | null = null): Promise<AuthUserDto> {
     const byTag = await this.userRepo.findByGamerTag(gamer_tag);
+    console.log("byTag:", byTag);
     if (byTag && byTag.id !== 0) return new AuthUserDto();
     const byEmail = await this.userRepo.findByEmail(email);
+    console.log("byEmail:", byEmail);
     if (byEmail && byEmail.id !== 0) return new AuthUserDto();
     const hash = await bcrypt.hash(password, this.saltRounds).catch(() => "");
+    console.log("hash:", hash);
     if (!hash) return new AuthUserDto();
     const created = await this.userRepo.create(
-      new User(0, gamer_tag, full_name, email, hash, profile_image)
+      new User(0, gamer_tag, full_name, email, hash, profile_image, UserRole.PLAYER)
     );
+    console.log("created:", created);
     if (created.id === 0) return new AuthUserDto();
     return new AuthUserDto(created.id, created.gamer_tag, created.role);
   }

@@ -46,14 +46,18 @@ export class EntityController {
   }
 
   private async create(req: Request, res: Response): Promise<void> {
+    console.log("Create tournament body:", req.body);
     const { game_id, name, format, max_teams, registration_deadline, starts_at, prize_pool } = req.body;
+    console.log("game_id:", game_id, typeof game_id);
     if (!game_id || !name || !format || !max_teams || !registration_deadline || !starts_at) {
       res.status(400).json({ success: false, message: "Sva obavezna polja moraju biti popunjena" });
       return;
     }
-    const dto = new CreateEntityDto(game_id, name, format, max_teams,
-      new Date(registration_deadline), new Date(starts_at), prize_pool ?? null);
+    const dto = new CreateEntityDto(
+    parseInt(game_id), name, format, parseInt(max_teams),
+    new Date(registration_deadline), new Date(starts_at), prize_pool ?? null);
     const created = await this.entityService.create(dto);
+    console.log("Created result:", created);
     if (!created) { res.status(500).json({ success: false, message: "Failed to create tournament" }); return; }
     res.status(201).json({ success: true, data: created });
   }

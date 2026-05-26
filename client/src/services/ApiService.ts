@@ -125,16 +125,26 @@ export const apiService = {
   },
 
   async registerTeamToTournament(tournamentId: number, teamId: number, token: string) {
-    const res = await fetch(`${API_URL}/tournaments/${tournamentId}/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ teamId }),
-    });
-    return res.json();
-  },
+  const res = await fetch(`${API_URL}/tournaments/${tournamentId}/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ teamId }),
+  });
+
+  const text = await res.text();
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      success: false,
+      message: `Server nije vratio JSON. Status: ${res.status}. Odgovor: ${text}`,
+    };
+  }
+},
 
   async getTeamById(teamId: number) {
     const res = await fetch(`${API_URL}/teams/${teamId}`);
