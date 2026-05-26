@@ -38,6 +38,7 @@ const DashboardPage = () => {
                     <button onClick={handleLogout} className="logout-btn">Odjavi se</button>
                     <button onClick={() => navigate('/teams')} className="nav-btn">Timovi</button>
                     <button onClick={() => navigate('/admin')} className="nav-btn">Admin</button>
+                    <button onClick={() => navigate('/watchlist')} className="nav-btn">Watchlist</button>
                 </nav>
             </header>
 

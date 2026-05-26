@@ -7,6 +7,7 @@ import TeamsPage from './pages/Teams/TeamsPage';
 import AdminPage from './pages/Admin/AdminPage';
 import HealthPage from './pages/Health/HealthPage';
 import AuditPage from './pages/Audit/AuditPage';
+import WatchlistPage from './pages/Watchlist/WatchlistPage';
 import './App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/audit" element={<AuditPage />} />
+        <Route path="/watchlist" element={<WatchlistPage />} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>

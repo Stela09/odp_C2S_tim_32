@@ -100,4 +100,45 @@ export const apiService = {
     });
     return res.json();
   },
+
+  async watchTournament(tournamentId: number, token: string) {
+    const res = await fetch(`${API_URL}/tournaments/${tournamentId}/watch`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  async unwatchTournament(tournamentId: number, token: string) {
+    const res = await fetch(`${API_URL}/tournaments/${tournamentId}/watch`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  async getWatchlist(token: string) {
+    const res = await fetch(`${API_URL}/watchlist`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  async registerTeamToTournament(tournamentId: number, teamId: number, token: string) {
+    const res = await fetch(`${API_URL}/tournaments/${tournamentId}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ teamId }),
+    });
+    return res.json();
+  },
+
+  async getTeamById(teamId: number) {
+    const res = await fetch(`${API_URL}/teams/${teamId}`);
+    return res.json();
+  },
+
 };

@@ -1,0 +1,73 @@
+.watchlist-container {
+    min-height: 100vh;
+    background-color: #0d1117;
+    color: #ffffff;
+    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+.watchlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+}
+
+.logo { color: #00ffcc; font-size: 1.5rem; letter-spacing: 4px; cursor: pointer; }
+.back-btn { padding: 8px 16px; background: transparent; border: 1px solid #30363d; color: #8b949e; border-radius: 8px; cursor: pointer; }
+.back-btn:hover { border-color: #00ffcc; color: #00ffcc; }
+
+.watchlist-main { padding: 2rem; }
+.watchlist-main h2 { color: #00ffcc; margin-bottom: 1.5rem; }
+
+.empty { color: #8b949e; }
+.link { color: #00ffcc; cursor: pointer; text-decoration: underline; }
+
+.watchlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.watchlist-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.3s ease;
+}
+
+.watchlist-card:hover { border-color: #00ffcc; }
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.card-header h3 { color: #00ffcc; }
+
+.status-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+.status-upcoming { background: #1f3a5f; color: #58a6ff; }
+.status-active { background: #1a3a2a; color: #3fb950; }
+.status-completed { background: #2a1f3a; color: #a371f7; }
+.status-cancelled { background: #3a1f1f; color: #f85149; }
+
+.card-body p { color: #8b949e; font-size: 0.9rem; margin: 0.3rem 0; }
+.card-body p span { color: #c9d1d9; font-weight: 500; }
+
+.unwatch-btn {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid #f85149;
+    color: #f85149;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.unwatch-btn:hover { background: #f85149; color: white; }
