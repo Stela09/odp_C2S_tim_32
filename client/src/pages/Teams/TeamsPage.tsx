@@ -17,22 +17,50 @@ interface Team {
     members: TeamMember[];
 }
 
+interface TeamInvitation {
+    id: number;
+    team_id: number;
+    team_name: string;
+    team_tag: string;
+    invited_by: string;
+}
+
+const getUserIdFromToken = (token: string): number | null => {
+    try {
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=')));
+        return Number(payload.id) || null;
+    } catch {
+        return null;
+    }
+};
+
 const TeamsPage = () => {
     const navigate = useNavigate();
     const [teams, setTeams] = useState<Team[]>([]);
+    const [invitations, setInvitations] = useState<TeamInvitation[]>([]);
+    const [inviteTags, setInviteTags] = useState<Record<number, string>>({});
     const [loading, setLoading] = useState(true);
     const [showCreate, setShowCreate] = useState(false);
     const [newTeam, setNewTeam] = useState({ name: '', tag: '', description: '' });
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
-    const loadTeams = useCallback((token: string) => {
-        apiService.getMyTeams(token).then(res => {
-            if (res.success) setTeams(res.data ?? []);
-        }).finally(() => setLoading(false));
+    const loadTeams = useCallback(async (token: string) => {
+        setLoading(true);
+        const [teamsRes, invitationsRes] = await Promise.all([
+            apiService.getMyTeams(token),
+            apiService.getTeamInvitations(token),
+        ]);
+
+        if (teamsRes.success) setTeams(teamsRes.data ?? []);
+        if (invitationsRes.success) setInvitations(invitationsRes.data ?? []);
+        setLoading(false);
     }, []);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) { navigate('/login'); return; }
+        setCurrentUserId(getUserIdFromToken(token));
         loadTeams(token);
     }, [navigate, loadTeams]);
 
@@ -48,6 +76,37 @@ const TeamsPage = () => {
             loadTeams(token);
         } else {
             alert(res.message ?? "Greška pri kreiranju tima!");
+        }
+    };
+
+    const handleInvite = async (teamId: number) => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const gamerTag = inviteTags[teamId]?.trim();
+        if (!gamerTag) {
+            alert('Unesi gamer tag igraca.');
+            return;
+        }
+
+        const res = await apiService.inviteTeamMember(teamId, gamerTag, token);
+        if (res.success) {
+            setInviteTags(prev => ({ ...prev, [teamId]: '' }));
+            alert('Pozivnica poslata!');
+        } else {
+            alert(res.message ?? 'Pozivnica nije poslata.');
+        }
+    };
+
+    const handleInvitation = async (invitation: TeamInvitation, action: "accept" | "decline") => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const res = await apiService.respondToTeamInvitation(invitation.team_id, invitation.id, action, token);
+        if (res.success) {
+            loadTeams(token);
+        } else {
+            alert(res.message ?? 'Pozivnica nije obradjena.');
         }
     };
 
@@ -79,6 +138,23 @@ const TeamsPage = () => {
                     </div>
                 )}
 
+                {invitations.length > 0 && (
+                    <section className="invitations-panel">
+                        <h3>Pozivnice</h3>
+                        {invitations.map(invitation => (
+                            <div key={invitation.id} className="invitation-row">
+                                <span>
+                                    {invitation.invited_by} te je pozvao u {invitation.team_name} [{invitation.team_tag}]
+                                </span>
+                                <div>
+                                    <button onClick={() => handleInvitation(invitation, "accept")} className="mini-btn accept-btn">Prihvati</button>
+                                    <button onClick={() => handleInvitation(invitation, "decline")} className="mini-btn decline-btn">Odbij</button>
+                                </div>
+                            </div>
+                        ))}
+                    </section>
+                )}
+
                 {loading ? (
                     <p>Učitavanje...</p>
                 ) : teams.length === 0 ? (
@@ -100,6 +176,17 @@ const TeamsPage = () => {
                                         </span>
                                     ))}
                                 </div>
+                                {t.members?.some(m => m.id === currentUserId && m.role === 'captain') && (
+                                    <div className="invite-box">
+                                        <input
+                                            type="text"
+                                            placeholder="Gamer tag igraca..."
+                                            value={inviteTags[t.id] ?? ''}
+                                            onChange={(e) => setInviteTags({ ...inviteTags, [t.id]: e.target.value })}
+                                        />
+                                        <button onClick={() => handleInvite(t.id)} className="mini-btn">Pozovi</button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

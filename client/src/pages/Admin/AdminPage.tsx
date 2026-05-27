@@ -115,6 +115,14 @@ const AdminPage = () => {
         else alert('Greska pri promeni uloge!');
     };
 
+    const handleDeleteUser = async (userId: number, gamerTag: string) => {
+        if (!confirm(`Obrisati korisnika ${gamerTag}?`)) return;
+
+        const res = await apiService.deleteUser(userId, token!);
+        if (res.success) loadData();
+        else alert(res.message ?? 'Greska pri brisanju korisnika!');
+    };
+
     const loadMatches = async (tournamentId: number) => {
         const res = await apiService.getTournamentMatches(tournamentId);
         if (res.success) {
@@ -287,6 +295,9 @@ const AdminPage = () => {
                                                         <option value="player">Player</option>
                                                         <option value="admin">Admin</option>
                                                     </select>
+                                                    <button onClick={() => handleDeleteUser(u.id, u.gamer_tag)} className="small-btn danger-btn">
+                                                        Obrisi
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}

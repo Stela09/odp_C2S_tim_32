@@ -15,6 +15,7 @@ export class UserController {
     this.router.get("/users",          authenticate, authorize(UserRole.ADMIN), this.getAll.bind(this));
     this.router.get("/users/:id",      this.getById.bind(this));
     this.router.patch("/users/:id/role", authenticate, authorize(UserRole.ADMIN), this.updateRole.bind(this));
+    this.router.delete("/users/:id", authenticate, authorize(UserRole.ADMIN), this.delete.bind(this));
   }
 
   private async getAll(req: Request, res: Response): Promise<void> {
@@ -43,6 +44,23 @@ export class UserController {
       await this.auditRepo?.log(req.user?.id ?? null, "UPDATE_ROLE", "user", id);
     }
     res.status(ok ? 200 : 500).json({ success: ok, message: ok ? "Role updated" : "Failed to update role" });
+  }
+
+  private async delete(req: Request, res: Response): Promise<void> {
+    const id = parseInt(req.params.id as string, 10);
+    if (isNaN(id)) { res.status(400).json({ success: false, message: "Invalid id" }); return; }
+
+    if (req.user?.id === id) {
+      res.status(400).json({ success: false, message: "Ne mozes obrisati sopstveni nalog" });
+      return;
+    }
+
+    const ok = await this.userService.delete(id);
+    if (ok) {
+      await this.auditRepo?.log(req.user?.id ?? null, "DELETE_USER", "user", id);
+    }
+
+    res.status(ok ? 200 : 404).json({ success: ok, message: ok ? "User deleted" : "User not found" });
   }
 
   public getRouter(): Router { return this.router; }

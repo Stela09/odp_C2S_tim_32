@@ -16,4 +16,8 @@ export class UserService implements IUserService {
   async updateRole(id: number, role: string): Promise<boolean> {
     return this.userRepo.updateRole(id, role);
   }
+
+  async delete(id: number): Promise<boolean> {
+    return this.userRepo.delete(id);
+  }
 }

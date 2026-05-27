@@ -212,6 +212,10 @@
     cursor: pointer;
 }
 
+.danger-btn {
+    background: #da3633;
+}
+
 .match-row td {
     background: #111820;
     color: #dbe7ff;

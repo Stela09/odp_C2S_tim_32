@@ -78,6 +78,21 @@ CREATE TABLE IF NOT EXISTS team_members (
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS team_invitations (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    team_id INT UNSIGNED NOT NULL,
+    invited_user_id INT UNSIGNED NOT NULL,
+    invited_by_user_id INT UNSIGNED NOT NULL,
+    status ENUM('pending','accepted','declined') NOT NULL DEFAULT 'pending',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    responded_at DATETIME NULL,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    FOREIGN KEY (invited_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (invited_by_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_invited_user_status (invited_user_id, status),
+    INDEX idx_team_invitation_status (team_id, status)
+);
+
 CREATE TABLE IF NOT EXISTS match_players (
     match_id INT UNSIGNED NOT NULL,
     user_id INT UNSIGNED NOT NULL,

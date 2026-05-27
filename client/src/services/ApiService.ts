@@ -57,7 +57,15 @@ export const apiService = {
     return res.json();
   },
 
-   async getMyTeams(token: string) {
+  async deleteUser(id: number, token: string) {
+    const res = await fetch(`${API_URL}/users/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  async getMyTeams(token: string) {
     const res = await fetch(`${API_URL}/teams`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -72,6 +80,37 @@ export const apiService = {
         Authorization: `Bearer ${token}` 
       },
       body: JSON.stringify({ name, tag, description }),
+    });
+    return res.json();
+  },
+
+  async getTeamInvitations(token: string) {
+    const res = await fetch(`${API_URL}/teams/invitations`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  async inviteTeamMember(teamId: number, gamerTag: string, token: string) {
+    const res = await fetch(`${API_URL}/teams/${teamId}/invite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ gamer_tag: gamerTag }),
+    });
+    return res.json();
+  },
+
+  async respondToTeamInvitation(teamId: number, invitationId: number, action: "accept" | "decline", token: string) {
+    const res = await fetch(`${API_URL}/teams/${teamId}/invite/respond`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ invitation_id: invitationId, action }),
     });
     return res.json();
   },

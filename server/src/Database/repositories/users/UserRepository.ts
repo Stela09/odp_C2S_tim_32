@@ -128,6 +128,53 @@ export class UserRepository implements IUserRepository {
     } finally { res.conn.release(); }
   }
 
+  async delete(id: number): Promise<boolean> {
+    const res = await this.db.getWriteConnection();
+    if (!res) return false;
+
+    try {
+      await res.conn.beginTransaction();
+
+      const [captainTeams] = await res.conn.execute<RowDataPacket[]>(
+        `SELECT team_id FROM team_members WHERE user_id = ? AND role = 'captain'`,
+        [id]
+      );
+
+      for (const team of captainTeams) {
+        const teamId = Number(team.team_id);
+        const [replacementRows] = await res.conn.execute<RowDataPacket[]>(
+          `SELECT user_id
+           FROM team_members
+           WHERE team_id = ? AND user_id <> ?
+           ORDER BY joined_at ASC
+           LIMIT 1`,
+          [teamId, id]
+        );
+
+        if (replacementRows.length > 0) {
+          await res.conn.execute(
+            `UPDATE team_members SET role = 'captain' WHERE team_id = ? AND user_id = ?`,
+            [teamId, replacementRows[0].user_id]
+          );
+        } else {
+          await res.conn.execute(`DELETE FROM teams WHERE id = ?`, [teamId]);
+        }
+      }
+
+      const [result] = await res.conn.execute<ResultSetHeader>(
+        `DELETE FROM users WHERE id = ?`,
+        [id]
+      );
+
+      await res.conn.commit();
+      return result.affectedRows > 0;
+    } catch (err) {
+      await res.conn.rollback();
+      this.logger.error("UserRepository", "delete failed", err);
+      return false;
+    } finally { res.conn.release(); }
+  }
+
   async exists(id: number): Promise<boolean> {
     const res = await this.db.getReadConnection();
     if (!res) return false;
